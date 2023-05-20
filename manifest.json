@@ -1,0 +1,19 @@
+{
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "parkmapper@mmmsoup.github.com"
+		}
+	},
+	"description": "view your parkruns on a map",
+	"manifest_version": 2,
+	"name": "parkmapper",
+	"version": "1.0",
+	"homepage_url": "https://github.com/mmmsoup/parkmapper",
+	"content_scripts": [
+		{
+			"matches": ["https://www.parkrun.org.uk/*"],
+			"css": ["parkmapper.css"],
+			"js": ["loader.js"]
+		}
+	]
+}
