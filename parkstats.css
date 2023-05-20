@@ -1,0 +1,112 @@
+/* shamelessly stolen from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup :) */
+.parkstats_popup {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.parkstats_popup .parkstats_popup_content {
+	visibility: hidden;
+	width: 160px;
+	background-color: #555;
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 8px 0;
+	position: absolute;
+	z-index: 1;
+	bottom: 125%;
+	left: 50%;
+	margin-left: -80px;
+}
+.parkstats_popup .parkstats_popup_content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+.parkstats_popup.parkstats_show .parkstats_popup_content {
+  visibility: visible;
+  -webkit-animation: fade_in 1s;
+  animation: fade_in 1s;
+}
+@-webkit-keyframes fade_in {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+@keyframes fade_in {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+/* end of shameless theft */
+
+/* map */
+#parkstats_map_container {
+	display: none;
+	position: fixed;
+	z-index: 100000;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+}
+#parkstats_topbar {
+	position: fixed;
+	z-index: 10000000;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	padding: 0px 20px;
+	backdrop-filter: blur(20px);
+	background: rgba(255, 255, 255, 0.8);
+}
+#parkstats_topbar ul {
+	list-style-type: none;
+	line-height: inherit;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+#parkstats_topbar a {
+	display: block;
+}
+#parkstats_left, #parkstats_left li {
+	float: left;
+	margin-right: 10px;
+}
+#parkstats_right, #parkstats_right li {
+	float: right;
+}
+.parkstats_mask {
+	opacity: 0.5;
+	color: #a1b6b7;
+}
+.parkstats_current_mask {
+	opacity: 1;
+}
+#parkstats_map {
+	width: 100%;
+	height: 100%;
+}
+
+/* end of map */
+
+/* bingo */
+#parkstats_bingo_progress {
+	margin: 0px !important;
+	font-weight: initial;
+	font-size: initial !important;
+}
+.parkstats_bingo_cell {
+	text-align: center;
+}
+/* end of bingo */
