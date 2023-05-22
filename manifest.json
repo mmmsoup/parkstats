@@ -4,14 +4,35 @@
 			"id": "parkstats@mmmsoup.github.com"
 		}
 	},
-	"description": "view your parkruns on a map",
+	"description": "view parkrunners' runs on a map and parkrun bingo progress",
 	"manifest_version": 2,
 	"name": "parkstats",
-	"version": "1.0",
+	"version": "1.1",
 	"homepage_url": "https://github.com/mmmsoup/parkstats",
 	"content_scripts": [
 		{
-			"matches": ["https://www.parkrun.org.uk/*"],
+			"matches": [
+				"https://www.parkrun.com.au/*",
+				"https://www.parkrun.co.at/*",
+				"https://www.parkrun.ca/*",
+				"https://www.parkrun.dk/*",
+				"https://www.parkrun.fi/*",
+				"https://www.parkrun.fr/*",
+				"https://www.parkrun.com.de/*",
+				"https://www.parkrun.ie/*",
+				"https://www.parkrun.it/*",
+				"https://www.parkrun.jp/*",
+				"https://www.parkrun.my/*",
+				"https://www.parkrun.co.nl/*",
+				"https://www.parkrun.co.nz/*",
+				"https://www.parkrun.no/*",
+				"https://www.parkrun.pl/*",
+				"https://www.parkrun.sg/*",
+				"https://www.parkrun.co.za/*",
+				"https://www.parkrun.se/*",
+				"https://www.parkrun.org.uk/*",
+				"https://www.parkrun.us/*"
+			],
 			"css": ["parkstats.css"],
 			"js": ["loader.js"]
 		}
