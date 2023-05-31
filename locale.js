@@ -1,4 +1,4 @@
-{
+var _locale_data = {
 	"langs_for_domains": {
 		"com.au": "en",
 		"co.at": "de",
@@ -30,7 +30,8 @@
 			"bingo_completed": "BINGO!!! Congrats to this parkrunner for completing parkrun bingo \\(^O^)/",
 			"bingo_info": "på {COURSE} {DATE}",
 			"bingo_more": "{NUMBER} mere",
-			"map_mask_completed": "afsluttet",
+			//"map_mask_completed": "afsluttet",
+			//"map_mask_all": "all",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "antal event",
@@ -44,7 +45,8 @@
 			"bingo_completed": "BINGO!!! Herzlichen Glückwunsch an diese/n Parkrunner*in für Parkrunbingo zu vollenden \\(^O^)/",
 			"bingo_info": "bei {COURSE} am {DATE}",
 			"bingo_more": "{NUMBER} mehr",
-			"map_mask_completed": "vollendet",
+			"map_mask_completed": "nur Vollendete zeigen",
+			"map_mask_all": "alle",
 			"map_mask_junior": "Junior",
 			"map_mask_parkrun": "Parkrun",
 			"times_completed": "Ereignisanzahl",
@@ -58,7 +60,8 @@
 			"bingo_completed": "BINGO!!! Congrats to this parkrunner for completing parkrun bingo \\(^O^)/",
 			"bingo_info": "at {COURSE} on {DATE}",
 			"bingo_more": "{NUMBER} autres",
-			"map_mask_completed": "complété",
+			//"map_mask_all": "all",
+			//"map_mask_completed": "complété",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "nombre d'événements",
@@ -72,7 +75,8 @@
 			"bingo_completed": "BINGO!!! Congrats to this parkrunner for completing parkrun bingo \\(^O^)/",
 			"bingo_info": "at {COURSE} on {DATE}",
 			"bingo_more": "{NUMBER} more",
-			"map_mask_completed": "completed",
+			"map_mask_all": "all",
+			"map_mask_completed": "only show completed",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "times completed",
@@ -86,7 +90,8 @@
 			"bingo_completed": "BINGO!!! Congrats to this parkrunner for completing parkrun bingo \\(^O^)/",
 			"bingo_info": "at {COURSE} on {DATE}",
 			"bingo_more": "altri {NUMBER}",
-			"map_mask_completed": "completato",
+			//"map_mask_all": "all",
+			//"map_mask_completed": "completato",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "numero di eventi",
@@ -100,7 +105,8 @@
 			"bingo_completed": "BINGO!!! Gefeliciteesd aan deze parkrunner met het voltooieen von parkrun bingo \\(^O^)/",
 			"bingo_info": "in {COURSE} op {DATE}",
 			"bingo_more": "meer ({NUMBER})",
-			"map_mask_completed": "voltooid",
+			"map_mask_all": "alle",
+			//"map_mask_completed": "voltooid",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "aantal keer voltooid",
@@ -114,7 +120,8 @@
 			"bingo_completed": "BINGO!!! grattis til denna deltagare för att avsluta parkrunbingot \\(^O^)/",
 			"bingo_info": "på {COURSE} på {DATE}",
 			"bingo_more": "{NUMBER} mer",
-			"map_mask_completed": "avslutad",
+			"map_mask_all": "alla",
+			"map_mask_completed": "visa bara avslutad",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
 			"times_completed": "antal event",
@@ -122,3 +129,27 @@
 		}
 	}
 }
+
+var _lang;
+
+function set_language(lang) {
+	_lang = lang;
+}
+
+function get_language_for_domain(domain) {
+	var lang = _locale_data.langs_for_domains[domain];
+	if (lang == null) {
+		console.warn("sorry! I haven't added a translation for '"+lang+"' yet so you're stuck with English for now :( ... please nag me on the github page: https://github.com/mmmsoup/parkstats");
+		lang = "en";
+	}
+	return lang;
+}
+
+get_localised_string = function(message) {
+	if (_lang == null || _locale_data.messages[_lang][message] == null) {
+		return _locale_data.messages["en"][message];
+	} else {
+		return _locale_data.messages[_lang][message];
+	}
+}
+
