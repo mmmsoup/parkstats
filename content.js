@@ -96,12 +96,22 @@ function main() {
 	const lang = get_language_for_domain(domain);
 	set_language(lang);
 
-	if (page.endsWith("all/")) {
+	if (page.endsWith("all/") || page.endsWith("5k/") || page.endsWith("juniors/")) {
 		// bingo
+		
 		bingo();
 	} else if (page.startsWith("/parkrunner")) {
 		// map
-		const events_table_rows = document.getElementById("event-summary").nextSibling.children[1].children;
+		
+		var events_table_rows;
+		document.querySelectorAll("table#results").forEach((results_table) => {
+			console.log(results_table.querySelector("thead > tr").children.length);
+			if (results_table.querySelector("thead > tr").children.length == 7) {
+				events_table_rows = results_table.querySelector("tbody").children;
+				console.log(events_table_rows);
+			}
+		});
+
 		var completed = [];
 		for (let i = 0; i < events_table_rows.length; i++) {
 			// 0: name
@@ -118,8 +128,6 @@ function main() {
 			]);
 		}
 
-		const toggle_all_node = document.querySelector("#content > p > a");
-		const parent_node = toggle_all_node.parentNode;
 		const show_map_node = document.createElement("a");
 		show_map_node.innerText = get_localised_string("view_on_map");
 		show_map_node.href = "javascript:void(0);"
@@ -127,8 +135,9 @@ function main() {
 			browser.runtime.sendMessage({data: completed, lang: lang, name: document.querySelector("h2").innerHTML.split("&nbsp;")[0]});
 		}
 		show_map_node.style.margin_left = 50;
-		parent_node.insertBefore(show_map_node, toggle_all_node.nextSibling);
-		parent_node.insertBefore(document.createElement("br"), show_map_node);
+		document.querySelector("#content > p").appendChild(document.createElement("br"));
+		document.querySelector("#content > p").appendChild(document.createElement("br"));
+		document.querySelector("#content > p").appendChild(show_map_node);
 	}
 }
 

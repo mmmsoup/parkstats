@@ -217,7 +217,5 @@ window.onload = function() {
 		zoomControl: false
 	});
 
-	load_baselayer().then(load_countrycodes).then(load_events).then(() => {
-		console.log("done");
-	});
+	load_baselayer().then(load_countrycodes).then(load_events);
 }
