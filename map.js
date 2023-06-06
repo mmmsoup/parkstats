@@ -110,16 +110,14 @@ function load_baselayer() {
 		const request = new XMLHttpRequest();
 		request.onload = function() {
 			if (this.status == 200) {
-				for (var i = 0; i < this.response.features.length; i++) {
-					L.geoJSON(this.response.features[i], {
-						style: {
-							color: "#888888",
-							fill: true,
-							fillColor: "#eeeeee",
-							fillOpacity: 1
-						}
-					}).addTo(map);
-				}
+				L.geoJSON(this.response, {
+					style: {
+						color: "#888888",
+						fill: true,
+						fillColor: "#eeeeee",
+						fillOpacity: 1
+					}
+				}).addTo(map);
 				resolve();
 			} else {
 				reject();
@@ -153,8 +151,11 @@ function load_events() {
 		const request = new XMLHttpRequest();
 		request.onload = function() {
 			if (this.status == 200) {
+				var events = {};
+				Object.assign(events, this.response);
+
 				completed.forEach((completed_event) => {
-					var event_in_list = this.response[completed_event[0]];
+					var event_in_list = events[completed_event[0]];
 					if (event_in_list == null) {
 						console.log("unable to find data for event '"+completed_event[0]+"'; this is likely because either the event no longer exists or the database contained in the extension is out of date");
 					} else {
@@ -172,7 +173,7 @@ function load_events() {
 				panes[2].style.zIndex = 401;
 				panes[3].style.zIndex = 403;
 
-				for (const [name, event_data] of Object.entries(this.response)) {
+				for (const [name, event_data] of Object.entries(events)) {
 					L.circleMarker(event_data.coords, {
 						color: event_data.completed == null ? "#444444" : "#444444",
 						fillColor: event_data.completed == null ? "#eeeeee" : "#ffa300",

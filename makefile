@@ -1,5 +1,5 @@
 NAME = parkstats
-VERSION = 1.2
+VERSION = 1.3
 
 STATIC_SOURCE = background.js content.css content.js countries.geojson locale.js map.css map.html map.js
 
@@ -12,11 +12,11 @@ LEAFLET_ARCHIVE = $(BUILD_DIR)/leaflet.zip
 LEAFLET_DIR = leaflet
 
 FIREFOX_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-firefox.zip
-CHROME_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-chrome.zip
+CHROMIUM_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-chromium.zip
 
 $(NAME): $(FIREFOX_PACKAGE)
 firefox: $(FIREFOX_PACKAGE)
-chrome: $(CHROME_PACKAGE)
+chromium: $(CHROMIUM_PACKAGE)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -40,7 +40,7 @@ $(LEAFLET_DIR): $(LEAFLET_ARCHIVE)
 manifest.json:
 	if [[ "$(BROWSER_NAME)" == "firefox" ]]; then \
 		cat manifest.json.in | jq '.version = "$(VERSION)"' | jq '.background.scripts = ["background.js"]' | jq '.background.persistent = false' > manifest.json; \
-	elif [[ "$(BROWSER_NAME)" == "chrome" ]]; then \
+	elif [[ "$(BROWSER_NAME)" == "chromium" ]]; then \
 		cat manifest.json.in | jq '.version = "$(VERSION)"' | jq '.background.service_worker = "background.js"' | jq '.manifest_version = 3' | jq 'del(.browser_specific_settings)' > manifest.json; \
 	else \
 		echo "unknown browser name '$1'" >&2; \
@@ -52,10 +52,10 @@ $(FIREFOX_PACKAGE): $(BUILD_DIR) $(LEAFLET_DIR) $(COUNTRYCODES) $(EVENTS) $(STAT
 	make --eval "BROWSER_NAME = firefox" manifest.json
 	web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(FIREFOX_PACKAGE)) --overwrite-dest
 
-$(CHROME_PACKAGE): $(BUILD_DIR) $(LEAFLET_DIR) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
+$(CHROMIUM_PACKAGE): $(BUILD_DIR) $(LEAFLET_DIR) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
 	rm -f manifest.json
-	make --eval "BROWSER_NAME = chrome" manifest.json
-	web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(CHROME_PACKAGE)) --overwrite-dest
+	make --eval "BROWSER_NAME = chromium" manifest.json
+	web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(CHROMIUM_PACKAGE)) --overwrite-dest
 
 clean:
 	rm -rf $(BUILD_DIR)
