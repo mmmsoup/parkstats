@@ -2,15 +2,16 @@ NAME = parkstats
 VERSION = 1.3
 
 STATIC_SOURCE = background.js content.css content.js countries.geojson locale.js map.css map.html map.js
-WEBEXT_IGNORE = "build/*" LICENCE makefile manifest.json.in mapdemo.gif README.md
+WEBEXT_IGNORE = "build/*" LICENCE makefile manifest.json.in mapdemo.gif "node_modules/*" package.json package-lock.json README.md
 
 SRC_DIR = src
 BUILD_DIR = build
 EVENTS_RAW = $(BUILD_DIR)/events.json
 EVENTS = events.json
 COUNTRYCODES = countrycodes.json
-LEAFLET_ARCHIVE = $(BUILD_DIR)/leaflet.zip
-LEAFLET_DIR = leaflet
+LEAFLET = leaflet
+WEBEXT = $(NODE)/web-ext/bin/web-ext.js
+NODE = node_modules
 
 FIREFOX_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-firefox.zip
 CHROMIUM_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-chromium.zip
@@ -31,12 +32,13 @@ $(EVENTS): $(EVENTS_RAW)
 $(COUNTRYCODES): $(EVENTS_RAW)
 	cat $(EVENTS_RAW) | jq '.countries | map_values(.url)' > $(COUNTRYCODES)
 
-$(LEAFLET_ARCHIVE):
-	wget -O $(LEAFLET_ARCHIVE) https://github.com/Leaflet/Leaflet/releases/download/v1.9.4/leaflet.zip
+$(NODE):
+	npm install
 
-$(LEAFLET_DIR): $(LEAFLET_ARCHIVE)
-	unzip $(LEAFLET_ARCHIVE) -d $(BUILD_DIR)
-	mv $(BUILD_DIR)/dist $(LEAFLET_DIR)
+$(LEAFLET): $(NODE)
+	ln -s $$(pwd)/$(NODE)/leaflet/dist $$(pwd)/$(LEAFLET)
+
+$(WEBEXT): $(NODE)
 
 manifest.json:
 	if [[ "$(BROWSER_NAME)" == "firefox" ]]; then \
@@ -48,19 +50,20 @@ manifest.json:
 		exit 1; \
 	fi
 
-$(FIREFOX_PACKAGE): $(BUILD_DIR) $(LEAFLET_DIR) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
+$(FIREFOX_PACKAGE): $(BUILD_DIR) $(WEBEXT) $(LEAFLET) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
 	rm -f manifest.json
 	make --eval "BROWSER_NAME = firefox" manifest.json
-	web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(FIREFOX_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
+	npx web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(FIREFOX_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
 
-$(CHROMIUM_PACKAGE): $(BUILD_DIR) $(LEAFLET_DIR) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
+$(CHROMIUM_PACKAGE): $(BUILD_DIR) $(WEBEXT) $(LEAFLET) $(COUNTRYCODES) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
 	rm -f manifest.json
 	make --eval "BROWSER_NAME = chromium" manifest.json
-	web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(CHROMIUM_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
+	npx web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(CHROMIUM_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -rf leaflet
-	rm -f countrycodes.json
-	rm -f events.json
+	rm -rf $(NODE)
+	rm -rf $(LEAFLET)
+	rm -f $(COUNTRYCODES)
+	rm -f $(EVENTS)
 	rm -f manifest.json

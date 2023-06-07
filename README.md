@@ -14,7 +14,7 @@ A webextension that adds extra functionality (and by that I mean gimmicks and ey
 ## Installation
 currently manually is the only method... but not for long (hopefully!)
 ### Manual
-1. make sure you have the build dependencies installed: `git`, `jq`, `make`, `unzip`, `web-ext` (through `npm`), and `wget`
+1. make sure you have the build dependencies installed: `git`, `jq`, `make`, `npm`, and `wget`
 2. clone and enter the repository: `git clone https://github.com/mmmsoup/parkstats && cd parkstats`
 3. build the extension for your browser of choice: `make firefox` (for Firefox and its derivatives) or `make chromium` (for Chromium-based browsers).
 4. load the extension (this differs between Firefox and Chromium):

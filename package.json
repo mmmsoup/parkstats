@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "leaflet": "^1.9.4",
+    "web-ext": "^7.6.2"
+  }
+}
