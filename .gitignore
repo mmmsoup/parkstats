@@ -1,4 +1,5 @@
 build
+countries.geojson
 countrycodes.json
 events.json
 leaflet

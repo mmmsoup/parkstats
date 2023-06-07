@@ -1,0 +1,3 @@
+[submodule "geojson-regions"]
+	path = geojson-regions
+	url = https://github.com/AshKyd/geojson-regions
