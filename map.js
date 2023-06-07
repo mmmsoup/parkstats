@@ -35,7 +35,9 @@ var pane_toggle = L.Control.extend({
 		container.style.padding = "10px";
 
 		var title = L.DomUtil.create("p", "", container);
-		title.innerHTML = "<b>"+atob(params.get("name"))+"</b>";
+		const title_text = document.createElement("b");
+		title_text.innerText = atob(params.get("name"));
+		title.appendChild(title_text);
 		title.style.textAlign = "center";
 		
 		var form = L.DomUtil.create("form", "", container);
@@ -73,7 +75,7 @@ var pane_toggle = L.Control.extend({
 
 			var label = L.DomUtil.create("label", "", form);
 			label.for = element.id;
-			label.innerHTML = text;
+			label.innerText = text;
 
 			return element;
 		}
@@ -95,7 +97,7 @@ var pane_toggle = L.Control.extend({
 		
 		var label = L.DomUtil.create("label", "", form);
 		label.for = "checkbox_completed";
-		label.innerHTML = get_localised_string("map_mask_completed");
+		label.innerText = get_localised_string("map_mask_completed");
 
 		radio_parkrun.checked = true;
 		checkbox_completed.checked = true;

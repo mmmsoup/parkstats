@@ -11,8 +11,7 @@
 .parkstats_popup .parkstats_popup_content {
 	visibility: hidden;
 	width: 160px;
-	background-color: #555;
-	color: #fff;
+	background-color: #272727;
 	text-align: center;
 	border-radius: 6px;
 	padding: 8px 0;
@@ -30,7 +29,7 @@
   margin-left: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: #555 transparent transparent transparent;
+  border-color: #272727 transparent transparent transparent;
 }
 .parkstats_popup.parkstats_show .parkstats_popup_content {
   visibility: visible;
@@ -44,6 +43,14 @@
 @keyframes fade_in {
   from {opacity: 0;}
   to {opacity:1 ;}
+}
+
+.parkstats_popup_content, .parkstats_popup_content > a {
+	color: #f2f2f2 !important;
+}
+
+.parkstats_popup_content > a:hover {
+	color: #ffa300 !important;
 }
 /* end of shameless theft */
 

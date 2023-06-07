@@ -50,25 +50,78 @@ function bingo() {
 				bingo_table_cell.classList.add("parkstats_bingo_cell");
 				const num = (num_bingo_columns*i+j);
 				if (bingo_times[num] == null) {
-					bingo_table_cell.innerHTML = "<b>__:__:"+(num < 10 ? "0" : "")+num.toString()+"</b>";
+					const cell_text = document.createElement("b");
+					cell_text.innerText = "__:__:"+(num < 10 ? "0" : "")+num.toString()
+					bingo_table_cell.appendChild(cell_text);
 				} else {
-					const timestr = "00:00:00".slice(0, 8-bingo_times[num][0].time.length)+bingo_times[num][0].time;
-					bingo_table_cell.innerHTML = "<b>"+timestr+"</b><br>"+get_localised_string("bingo_info").replace("{COURSE}", "<a href=\""+bingo_times[num][0].url+"\">"+bingo_times[num][0].name+"</a>").replace("{DATE}", bingo_times[num][0].date);
+					const time_element = document.createElement("b");
+					time_element.innerText = "00:00:00".slice(0, 8-bingo_times[num][0].time.length)+bingo_times[num][0].time;
+					bingo_table_cell.appendChild(time_element);
+
+					bingo_table_cell.appendChild(document.createElement("br"));
+
+					const info_parts = get_localised_string("bingo_info").replace("{DATE}", bingo_times[num][0].date).split("{COURSE}");
+
+					bingo_table_cell.appendChild(document.createTextNode(info_parts[0]));
+
+					const info_course = document.createElement("a");
+					info_course.innerText = bingo_times[num][0].name;
+					info_course.href = bingo_times[num][0].url;
+					bingo_table_cell.appendChild(info_course);
+
+					bingo_table_cell.appendChild(document.createTextNode(info_parts[1]));
+
 					const num_times_for_time = bingo_times[num].length; // heheh what a stupid name
 					if (num_times_for_time != 1) {
-						bingo_table_cell.innerHTML += "<br>(<div class=\"parkstats_popup\"><a href=\"javascript:void(0)\" onclick=\"event.target.parentElement.classList.add('parkstats_show')\">"+get_localised_string("bingo_more").replace("{NUMBER}", (num_times_for_time-1).toString())+"</a></div>)";
-						const bingo_cell_popup = document.createElement("div");
-						bingo_cell_popup.classList.add("parkstats_popup_content");
-						bingo_cell_popup.innerHTML = "<b>"+get_localised_string("bingo_more").replace("{NUMBER}", (num_times_for_time-1).toString())+"</b>";
-						for (let k = 1; k < bingo_times[num].length; k++) {
-							bingo_cell_popup.innerHTML += "<br>"+bingo_times[num][k].time+" "+get_localised_string("bingo_info").replace("{COURSE}", "<a href=\""+bingo_times[num][k].url+"\">"+bingo_times[num][k].name+"</a>").replace("{DATE}", bingo_times[num][k].date);
+						bingo_table_cell.appendChild(document.createElement("br"));
+						bingo_table_cell.appendChild(document.createTextNode("("));
+
+						const popup_container = document.createElement("div");
+						popup_container.classList.add("parkstats_popup");
+						bingo_table_cell.appendChild(popup_container);
+
+						const popup_show_button = document.createElement("a");
+						popup_show_button.href = "javascript:void(0)";
+						popup_show_button.onclick = function(event) {
+							//event.target.parentElement.classList.add("parkstats_show")
+							popup_container.classList.add("parkstats_show")
 						}
-						bingo_table_cell.querySelector(".parkstats_popup").appendChild(bingo_cell_popup);
+						popup_show_button.innerText = get_localised_string("bingo_more").replace("{NUMBER}", (num_times_for_time-1).toString());
+						popup_container.appendChild(popup_show_button);
+
+						bingo_table_cell.appendChild(document.createTextNode(")"));
+
+						const popup = document.createElement("div");
+						popup.classList.add("parkstats_popup_content");
+
+						const popup_title = document.createElement("b");
+						popup_title.innerText = get_localised_string("bingo_more").replace("{NUMBER}", (num_times_for_time-1).toString());
+						popup.appendChild(popup_title);
+
+						for (let k = 1; k < bingo_times[num].length; k++) {
+							popup.appendChild(document.createElement("br"));
+
+							const popup_info_parts = get_localised_string("bingo_info").replace("{DATE}", bingo_times[num][k].date).split("{COURSE}");
+							
+							popup.appendChild(document.createTextNode(bingo_times[num][k].time+" "+popup_info_parts[0]));
+
+							const popup_info_course = document.createElement("a");
+							popup_info_course.innerText = bingo_times[num][k].name;
+							popup_info_course.href = bingo_times[num][k].url;
+							popup.appendChild(popup_info_course);
+
+							popup.appendChild(document.createTextNode(popup_info_parts[1]));
+						}
+
+						popup_container.appendChild(popup);
 					}
+
 					bingo_times_completed++;
 				}
+
 				bingo_table_row.appendChild(bingo_table_cell);
 			}
+
 			bingo_table.appendChild(bingo_table_row);
 		}
 
