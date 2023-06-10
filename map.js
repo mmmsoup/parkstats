@@ -2,14 +2,19 @@ if (typeof(browser) === "undefined") {
 	var browser = chrome;
 }
 
+let completed;
+let countrycodes;
 let map;
 let params;
 let runner_name;
-let completed;
-let countrycodes;
 
 // uncompleted parkruns, completed parkruns, uncompleted juniors, completed juniors
 var panes = new Array(4);
+
+let marker_background_colour;
+let marker_border_colour;
+let marker_border_radius;
+let marker_border_width;
 
 const log_div = document.createElement("div");
 // severity: "message", "warning", or "error"
@@ -58,18 +63,18 @@ var parkstats_control = L.Control.extend({
 		const PARKRUN_LAYER	= 1;
 		const JUNIOR_LAYER	= 2;
 
-		var visible_layers = PARKRUN_LAYER;
+		var visible_layers = PARKRUN_LAYER | JUNIOR_LAYER;
 		var only_completed_visible = true;
 
 		function toggle_layers() {
 			// yes i hate this too
 			for (var i = 0; i < panes.length; i++) {
-				if (visible_layers & PARKRUN_LAYER) {
+				if (visible_layers & PARKRUN_LAYER && visible_layers & JUNIOR_LAYER) {
+					panes[i].style.display = (i % 2) || !only_completed_visible ? "initial" : "none";
+				} else if (visible_layers & PARKRUN_LAYER) {
 					panes[i].style.display = (i == 1) || (!only_completed_visible && i == 0) ? "initial" : "none";
 				} else if (visible_layers & JUNIOR_LAYER) {
 					panes[i].style.display = (i == 3) || (!only_completed_visible && i == 2) ? "initial" : "none";
-				} else if (visible_layers & PARKRUN_LAYER && visible_layers & JUNIOR_LAYER) {
-					panes[i].style.display = (i % 2) || !only_completed_visible ? "initial" : "none";
 				}
 			}
 		}
@@ -112,7 +117,7 @@ var parkstats_control = L.Control.extend({
 		label.for = "checkbox_completed";
 		label.innerText = get_localised_string("map_mask_completed");
 
-		radio_parkrun.checked = true;
+		radio_all.checked = true;
 		checkbox_completed.checked = true;
 		toggle_layers();
 
@@ -156,7 +161,7 @@ var parkstats_control = L.Control.extend({
 							parse_dict(value, next);
 						} else {
 							const val_el = L.DomUtil.create("span", "technical_info_val", el);
-							val_el.innerText = value.toString();
+							val_el.innerText = value;
 						}
 					}
 				}
@@ -239,21 +244,39 @@ function load_events() {
 				panes[3].style.zIndex = 403;
 
 				for (const [name, event_data] of Object.entries(events)) {
-					L.circleMarker(event_data.coords, {
-						color: event_data.completed == null ? "#444444" : "#444444",
-						fillColor: event_data.completed == null ? "#eeeeee" : "#ffa300",
-						fillOpacity: 1,
-						pane: (event_data.junior ? "j" : "p") + (event_data.completed == null ? "" : "c"),
-						radius: 4,
-						weight: 2
-					}).addTo(map).on("click", function(event) {
 
-						var html = "<a href=\"https://"+countrycodes[event_data.countrycode]+"/"+name+"\"><b>"+event_data.longname+"</b></a><br>"+event_data.location;
-						if (event_data.completed != null) {
-							html += "<hr><table style=\"width: 100%\"><tr><td>"+get_localised_string("times_completed")+"</td><td style=\"float: right;\">"+event_data.completed[1]+"</td></tr><tr><td>"+get_localised_string("best_time")+"</td><td style=\"float: right;\">"+event_data.completed[4]+"</td></tr><tr><td>"+get_localised_string("best_position")+"</td><td style=\"float: right;\">"+event_data.completed[3]+"</td></tr><tr><td>"+get_localised_string("best_gender_position")+"</td><td style=\"float: right;\">"+event_data.completed[2]+"</td></tr></table>"
-						}
-						event.target.bindPopup(html).openPopup();
+					// would use generic L.marker for both but L.circleMarker seems to have better performance
+					var marker;
+					if (event_data.completed == null) {
+						marker = L.circleMarker(event_data.coords, {
+							color: marker_border_colour,
+							fillColor: marker_background_colour,
+							fillOpacity: 1,
+							pane: event_data.junior ? "j" : "p",
+							radius: marker_border_radius,
+							weight: marker_border_width
+						}).addTo(map);
+					} else {
+						marker = L.marker(event_data.coords, {
+							icon: L.divIcon({
+								html: event_data.completed[1],
+								className: "marker completed"
+							}),
+							pane: (event_data.junior ? "jc" : "pc")
+						}).addTo(map);
+					}
+
+					var html = "<a href=\"https://"+countrycodes[event_data.countrycode]+"/"+name+"\"><b>"+event_data.longname+"</b></a><br>"+event_data.location;
+					if (event_data.completed != null) {
+						html += "<hr><table style=\"width: 100%\"><tr><td>"+get_localised_string("times_completed")+"</td><td style=\"float: right;\">"+event_data.completed[1]+"</td></tr><tr><td>"+get_localised_string("best_time")+"</td><td style=\"float: right;\">"+event_data.completed[4]+"</td></tr><tr><td>"+get_localised_string("best_position")+"</td><td style=\"float: right;\">"+event_data.completed[3]+"</td></tr><tr><td>"+get_localised_string("best_gender_position")+"</td><td style=\"float: right;\">"+event_data.completed[2]+"</td></tr></table>"
+					}
+
+					const popup = L.popup(event_data.coords, {
+						content: html
 					});
+					marker.on("click", function(event) {
+						map.openPopup(popup);
+					})
 				}
 
 				map.addControl(new parkstats_control());
@@ -277,6 +300,12 @@ window.onload = function() {
 	document.querySelector("html").lang = params.get("lang");
 	set_language(params.get("lang"));
 	document.title = "Parkstats — "+runner_name
+
+	const style = getComputedStyle(document.documentElement);
+	marker_background_colour = style.getPropertyValue("--marker-background");
+	marker_border_colour = style.getPropertyValue("--marker-border-colour");
+	marker_border_radius = parseInt(style.getPropertyValue("--marker-size"))/2;
+	marker_border_width = parseInt(style.getPropertyValue("--marker-border-width"));
 
 	map = L.map("map", {
 		center: [51, 0],

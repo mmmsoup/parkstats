@@ -158,10 +158,8 @@ function main() {
 		
 		var events_table_rows;
 		document.querySelectorAll("table#results").forEach((results_table) => {
-			console.log(results_table.querySelector("thead > tr").children.length);
 			if (results_table.querySelector("thead > tr").children.length == 7) {
 				events_table_rows = results_table.querySelector("tbody").children;
-				console.log(events_table_rows);
 			}
 		});
 
@@ -181,16 +179,22 @@ function main() {
 			]);
 		}
 
-		const show_map_node = document.createElement("a");
-		show_map_node.innerText = get_localised_string("view_on_map");
-		show_map_node.href = "javascript:void(0);"
+		// stops the annoying build-up when reloading the extension over and over again
+		var show_map_node = document.getElementById("parkstats_show_map");
+		if (show_map_node == null) {
+			show_map_node = document.createElement("a");
+			show_map_node.id = "parkstats_show_map"
+			show_map_node.href = "javascript:void(0);"
+			show_map_node.style.margin_left = 50;
+			show_map_node.innerText = get_localised_string("view_on_map");
+			const parent = document.querySelector("#content > p");
+			parent.appendChild(document.createElement("br"));
+			parent.appendChild(document.createElement("br"));
+			parent.appendChild(show_map_node);
+		}
 		show_map_node.onclick = function() {
 			browser.runtime.sendMessage({data: completed, lang: lang, name: document.querySelector("h2").innerHTML.split("&nbsp;")[0]});
 		}
-		show_map_node.style.margin_left = 50;
-		document.querySelector("#content > p").appendChild(document.createElement("br"));
-		document.querySelector("#content > p").appendChild(document.createElement("br"));
-		document.querySelector("#content > p").appendChild(show_map_node);
 	}
 }
 

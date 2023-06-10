@@ -1,5 +1,5 @@
 NAME = parkstats
-VERSION = 1.4
+VERSION = 1.4.1
 
 # config for COUNTRYGEOJSON (from https://github.com/AshKyd/geojson-regions)
 # resolution: one of 10m, 50m, 110m
@@ -71,6 +71,10 @@ manifest.json:
 $(BUILD_INFO):
 	echo -e "{ \n\
 		\"build_time\": $$(date "+%s"),\n\
+		\"geojson-regions\": {\n\
+			\"properties\": "'$(GEOJSON_PROPERTIES)'",\n\
+			\"resolution\": \"$(GEOJSON_RESOLUTION)\"\n\
+		},\n\
 		\"events\": {\n\
 			\"fetch_time\": $$(stat --printf="%Y" $(EVENTS_RAW)),\n\
 			\"md5\": \"$$(md5sum $(EVENTS_RAW) | awk '{print $$1}')\"\n\
