@@ -1,4 +1,5 @@
 build
+build.json
 countries.geojson
 countrycodes.json
 events.json

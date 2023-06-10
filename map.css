@@ -7,45 +7,79 @@
 }
 
 #pane_toggle {
+	width: 250px;
 	padding: 10px;
 }
 
-#topbar {
-	position: fixed;
-	z-index: 10000000;
-	top: 0px;
-	left: 0px;
-	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	padding: 0px 20px;
-	background: #f2f2f2;
-}
-#topbar ul {
-	list-style-type: none;
-	line-height: inherit;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-}
-#topbar a {
-	display: block;
-}
-#left, #left li {
-	float: left;
-	margin-right: 10px;
-}
-#right, #right li {
-	float: right;
-}
-.mask {
-	opacity: 0.5;
-	color: #a1b6b7;
-}
-.current_mask {
-	opacity: 1;
-}
 #map {
 	width: 100%;
 	height: 100%;
+}
+
+.section:not(:last-child) {
+	margin-bottom: 10px;
+}
+
+p.heading {
+	margin: 0px;
+	text-align: center;
+}
+
+.log, .build_info {
+	font-family: "Courier New";
+	word-wrap: anywhere;
+}
+
+.collapsible::before {
+	content: "▾";
+	display: inline-block;
+	width: 10px;
+}
+
+.collapsible.collapsed::before {
+	content: "▸";
+	display: inline-block;
+	width: 10px;
+}
+
+.collapsible.collapsed + div {
+	height: 0px;
+	overflow: hidden;
+}
+
+.technical_info_val {
+	padding-left: 10px;
+}
+
+.logitem {
+	padding: 2px;
+	margin-left: 10px;
+	border-left: 1px solid lightgrey;
+	border-right: 1px solid lightgrey;
+	border-top: 1px solid lightgrey;
+}
+
+.logitem:first-child {
+	border-radius: 5px 5px 0px 0px;
+}
+
+.logitem:last-child {
+	border-bottom: 1px solid lightgrey;
+	border-radius: 0px 0px 5px 5px;
+}
+
+.logitem:first-child:last-child {
+	border-radius: 5px;
+}
+
+.logitem.message {
+	background-color: none;
+}
+
+.logitem.warning {
+	background-color: #ffee90;
+}
+
+.logitem.error {
+	background-color: #ff9090;
 }

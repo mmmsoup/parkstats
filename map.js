@@ -4,11 +4,22 @@ if (typeof(browser) === "undefined") {
 
 let map;
 let params;
+let runner_name;
 let completed;
 let countrycodes;
 
 // uncompleted parkruns, completed parkruns, uncompleted juniors, completed juniors
 var panes = new Array(4);
+
+const log_div = document.createElement("div");
+// severity: "message", "warning", or "error"
+function log(message, severity) {
+	const container = document.createElement("div");
+	container.classList.add("logitem");
+	container.classList.add(severity == null ? "message" : severity);
+	container.innerText = message;
+	log_div.appendChild(container);
+}
 
 function show_map_popup(e) {
 	let popup = new maplibregl.Popup();
@@ -22,25 +33,27 @@ function show_map_popup(e) {
 	popup.addTo(map);
 }
 
-var pane_toggle = L.Control.extend({        
+var parkstats_control = L.Control.extend({        
 	options: {
 		position: "topleft"
 	},
 	
 	onAdd: function (map) {
-		var container = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
+		const container = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
 		container.id = "pane_toggle"
 		container.style.background = "#ffffff";
 		container.style.border = "2px solid rgba(0,0,0,0.2)";
 		container.style.padding = "10px";
 
-		var title = L.DomUtil.create("p", "", container);
-		const title_text = document.createElement("b");
-		title_text.innerText = atob(params.get("name"));
-		title.appendChild(title_text);
-		title.style.textAlign = "center";
+		// panes and stuff
+		const panes_section = L.DomUtil.create("div", "section", container);
+		panes_section.style.textAlign = "center";
+
+		const panes_title = L.DomUtil.create("b", "", L.DomUtil.create("p", "heading", panes_section));
+		panes_title.innerText = runner_name;
 		
-		var form = L.DomUtil.create("form", "", container);
+		const panes_form = L.DomUtil.create("form", "", panes_section);
+		panes_form.style.display = "inline-block";
 
 		const PARKRUN_LAYER	= 1;
 		const JUNIOR_LAYER	= 2;
@@ -62,7 +75,7 @@ var pane_toggle = L.Control.extend({
 		}
 
 		function create_radio(form, mask, text) {
-			var element = L.DomUtil.create("input", "", form);
+			const element = L.DomUtil.create("input", "", form);
 			element.type = "radio";
 			element.name = "pane";
 
@@ -73,20 +86,20 @@ var pane_toggle = L.Control.extend({
 				}
 			});
 
-			var label = L.DomUtil.create("label", "", form);
+			const label = L.DomUtil.create("label", "", form);
 			label.for = element.id;
 			label.innerText = text;
 
 			return element;
 		}
 
-		var radio_parkrun = create_radio(form, PARKRUN_LAYER, get_localised_string("map_mask_parkrun"));
-		var radio_junior = create_radio(form, JUNIOR_LAYER, get_localised_string("map_mask_junior"));
-		var radio_all = create_radio(form, PARKRUN_LAYER | JUNIOR_LAYER, get_localised_string("map_mask_all"));
+		const radio_parkrun = create_radio(panes_form, PARKRUN_LAYER, get_localised_string("map_mask_parkrun"));
+		const radio_junior = create_radio(panes_form, JUNIOR_LAYER, get_localised_string("map_mask_junior"));
+		const radio_all = create_radio(panes_form, PARKRUN_LAYER | JUNIOR_LAYER, get_localised_string("map_mask_all"));
 
-		L.DomUtil.create("br", "", form);
+		L.DomUtil.create("br", "", panes_form);
 
-		var checkbox_completed = L.DomUtil.create("input", "", form);
+		const checkbox_completed = L.DomUtil.create("input", "", panes_form);
 		checkbox_completed.type = "checkbox";
 		checkbox_completed.id = "checkbox_completed";
 
@@ -95,7 +108,7 @@ var pane_toggle = L.Control.extend({
 			toggle_layers();
 		});
 		
-		var label = L.DomUtil.create("label", "", form);
+		const label = L.DomUtil.create("label", "", panes_form);
 		label.for = "checkbox_completed";
 		label.innerText = get_localised_string("map_mask_completed");
 
@@ -103,6 +116,56 @@ var pane_toggle = L.Control.extend({
 		checkbox_completed.checked = true;
 		toggle_layers();
 
+		// technical info etc...
+		function toggle_collapsed() {
+			this.classList.toggle("collapsed");
+		}
+
+		const technical_section = L.DomUtil.create("div", "section", container);
+
+		const technical_title = L.DomUtil.create("p", "heading", technical_section);
+		technical_title.style.textAlign = "center";
+		technical_title.classList.add("collapsible", "collapsed");
+		technical_title.onclick = toggle_collapsed;
+		const technical_title_text = L.DomUtil.create("b", "", technical_title);
+		technical_title_text.innerText = " "+get_localised_string("technical_details");
+
+		const technical_container = L.DomUtil.create("div", "", technical_section);
+
+		const log_container = L.DomUtil.create("div", "log", technical_container);
+		const log_title = L.DomUtil.create("b", "collapsible", log_container);
+		log_title.innerText = "log";
+		log_title.onclick = toggle_collapsed;
+		log_container.appendChild(log_div);
+
+		const request = new XMLHttpRequest();
+		request.responseType = "json";
+		request.onload = function() {
+			if (this.status == 200) {
+				const start_collapsed = true;
+				function parse_dict(dict, parent) {
+					for (const [key, value] of Object.entries(dict)) {
+						const el = L.DomUtil.create("div", "", parent);
+						const key_el = L.DomUtil.create("b", start_collapsed ? "collapsed" : "", el);
+						key_el.innerText = key;
+						if (typeof(value) === "object") {
+							key_el.classList.add("collapsible");
+							key_el.onclick = toggle_collapsed;
+							const next = L.DomUtil.create("div", "", el);
+							next.style.paddingLeft = "10px";
+							parse_dict(value, next);
+						} else {
+							const val_el = L.DomUtil.create("span", "technical_info_val", el);
+							val_el.innerText = value.toString();
+						}
+					}
+				}
+				parse_dict({"build.json": this.response}, L.DomUtil.create("div", "build_info", technical_container));
+			}
+		}
+		request.open("GET", browser.runtime.getURL("build.json"));
+		request.send();
+		
 		return container;
 	}
 });
@@ -159,7 +222,7 @@ function load_events() {
 				completed.forEach((completed_event) => {
 					var event_in_list = events[completed_event[0]];
 					if (event_in_list == null) {
-						console.log("unable to find data for event '"+completed_event[0]+"'; this is likely because either the event no longer exists or the database contained in the extension is out of date");
+						log("unable to find event data for '"+completed_event[0]+"' - it likely no longer exists :(", "warning");
 					} else {
 						event_in_list.completed = completed_event;
 					}
@@ -193,8 +256,7 @@ function load_events() {
 					});
 				}
 
-				map.addControl(L.control.zoom({position: "bottomleft"}));
-				map.addControl(new pane_toggle());
+				map.addControl(new parkstats_control());
 
 				resolve();
 			} else {
@@ -210,15 +272,21 @@ function load_events() {
 window.onload = function() {
 	params = new URLSearchParams(window.location.search);
 	completed = JSON.parse(atob(params.get("data")));
+	runner_name = atob(params.get("name"));
 
 	document.querySelector("html").lang = params.get("lang");
 	set_language(params.get("lang"));
+	document.title = "Parkstats — "+runner_name
 
 	map = L.map("map", {
 		center: [51, 0],
 		zoom: 3,
 		zoomControl: false
 	});
+
+	map.addControl(L.control.zoom({position: "bottomleft"}));
+
+	map.attributionControl.addAttribution("<a href=\"https://www.parkrun.com\">Parkrun</a>");
 
 	load_baselayer().then(load_countrycodes).then(load_events);
 }

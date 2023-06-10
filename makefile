@@ -19,6 +19,7 @@ COUNTRYGEOJSON = countries.geojson
 LEAFLET = leaflet
 WEBEXT = $(NODE)/web-ext/bin/web-ext.js
 NODE = node_modules
+BUILD_INFO = build.json
 
 FIREFOX_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-firefox.zip
 CHROMIUM_PACKAGE = $(BUILD_DIR)/$(NAME)-$(VERSION)-chromium.zip
@@ -43,7 +44,7 @@ $(NODE):
 	npm install
 
 $(LEAFLET): $(NODE)
-	ln -s $$(pwd)/$(NODE)/leaflet/dist $$(pwd)/$(LEAFLET)
+	ln -fs $$(pwd)/$(NODE)/leaflet/dist $$(pwd)/$(LEAFLET)
 
 $(WEBEXT): $(NODE)
 
@@ -67,15 +68,39 @@ manifest.json:
 		exit 1; \
 	fi
 
+$(BUILD_INFO):
+	echo -e "{ \n\
+		\"build_time\": $$(date "+%s"),\n\
+		\"events\": {\n\
+			\"fetch_time\": $$(stat --printf="%Y" $(EVENTS_RAW)),\n\
+			\"md5\": \"$$(md5sum $(EVENTS_RAW) | awk '{print $$1}')\"\n\
+		},\n\
+		\"git\": {\n\
+			\"commit\": \"$$(git show -s | grep -Po "(?<=commit )[0-9a-f]*")\",\n\
+			\"diff\": \"$$(git diff --shortstat | cut -c2-)\",\n\
+			\"remote\": \"$$(git remote --verbose | grep -Po "[^\t]*(?=\.git \(fetch\))")\"\n\
+		},\n\
+		\"packaged\": true,\n\
+		\"target\": \"$$([ -n "$(BROWSER_NAME)" ] && echo $(BROWSER_NAME) || echo "unknown")\",\n\
+		\"version\": \"$(VERSION)\"\n\
+	}" > $(BUILD_INFO)
+
+postbuild:
+	tmpfile=$$(mktemp) && jq '.packaged = false | del(.build_time) | del(.git.commit) | del(.git.diff)' $(BUILD_INFO) > "$$tmpfile" && mv "$$tmpfile" $(BUILD_INFO)
+
 $(FIREFOX_PACKAGE): $(BUILD_DIR) $(WEBEXT) $(LEAFLET) $(COUNTRYCODES) $(COUNTRYGEOJSON) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
 	rm -f manifest.json
 	make --eval "BROWSER_NAME = firefox" manifest.json
+	make --eval "BROWSER_NAME = firefox" --always-make $(BUILD_INFO)
 	npx web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(FIREFOX_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
+	make postbuild
 
 $(CHROMIUM_PACKAGE): $(BUILD_DIR) $(WEBEXT) $(LEAFLET) $(COUNTRYCODES) $(COUNTRYGEOJSON) $(EVENTS) $(STATIC_SOURCE) manifest.json.in
 	rm -f manifest.json
 	make --eval "BROWSER_NAME = chromium" manifest.json
+	make --eval "BROWSER_NAME = chromium" --always-make $(BUILD_INFO)
 	npx web-ext build --artifacts-dir $(BUILD_DIR) --filename $(shell basename $(CHROMIUM_PACKAGE)) --ignore-files $(WEBEXT_IGNORE) --overwrite-dest
+	make postbuild
 
 clean:
 	rm -rf $(BUILD_DIR)

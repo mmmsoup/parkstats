@@ -79,6 +79,7 @@ var _locale_data = {
 			"map_mask_completed": "only show completed",
 			"map_mask_junior": "junior",
 			"map_mask_parkrun": "parkrun",
+			"technical_details": "Log & Technical",
 			"times_completed": "times completed",
 			"view_on_map": "View this parkrunner's parkruns on a map"
 		},
